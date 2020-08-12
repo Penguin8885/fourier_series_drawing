@@ -20,6 +20,7 @@ np.set_printoptions(precision=3)
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+
 def get_reg_func(t, f, N):
     # サンプル点の数の取得
     K = len(f)
@@ -32,10 +33,10 @@ def get_reg_func(t, f, N):
         A[:, 2*n]   = np.cos(n*t)
 
     # 回帰係数wの計算
-    f = f.reshape(-1, 1)            # 列ベクトル化
-    I = np.eye(A.shape[1])                   # 単位行列
+    f = f.reshape(-1, 1)    # 列ベクトル化
+    I = np.eye(A.shape[1])  # 単位行列
     λ = 0.0000000001
-    w = la.solve(A.T@A + λ*I, A.T@f)      # w = (A^T A + λI)^{-1} A^T f
+    w = la.solve(A.T@A + λ*I, A.T@f) # w = (A^T A + λI)^{-1} A^T f
 
     # 回帰関数を定義(クロージャ)
     def calc_reg_func(t, w):
@@ -49,35 +50,46 @@ def get_reg_func(t, f, N):
     g = lambda t: calc_reg_func(t, w)
     return g
 
-def plot_animation(t, x, y, x_s, y_s):
+def plot_animation(t, x, y, t_s, x_s, y_s):
     fig = plt.figure()
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+    plt.rcParams["font.size"] = 12
+    plt.subplots_adjust(left=0.07, right=0.99, bottom=0.05, top=0.98)
+    ax1 = plt.subplot(2, 2, 1) # y-tグラフ
+    ax2 = plt.subplot(2, 2, 2) # y-xグラフ
+    ax4 = plt.subplot(2, 2, 4) # x-tグラフ(縦向き)
+
     ims = []
-    for i in range(0, len(t), int(len(t)/100)):
-        if i % 100 == 0:
-            print(i)
-        im = plt.scatter(x_s, y_s, c='r', s=20)
-        im = plt.plot(x[:i], y[:i], c='b')
-        ims.append(im)
-    ani = animation.ArtistAnimation(fig, ims, interval=100)
+    for i in range(0, len(t)+int(len(t)/10), int(len(t)/10)):
+        print(i)
+        ax1.scatter(t_s, y_s, c='r')
+        ax2.scatter(x_s, y_s, c='r')
+        ax4.scatter(x_s, t_s, c='r')
+        im1 = ax1.plot(t[:i], y[:i], c='b')[0]
+        im2 = ax2.plot(x[:i], y[:i], c='b')[0]
+        im4 = ax4.plot(x[:i], t[:i], c='b')[0]
+        ims.append([im1, im2, im4])
+
+    ani = animation.ArtistAnimation(fig, ims, interval=1000)
     # ani.save('anim.mp4')
 
 if __name__ == '__main__':
     data = np.loadtxt("path1.csv", delimiter=",")
     # data = np.loadtxt("path2.csv", delimiter=",")
-    data = np.r_[data, np.flipud(data)]
+    data = np.r_[data, data[0,:].reshape(1,-1)]
     K = data.shape[0] # サンプリング数
-    N = 5            # 三角関数の級数の個数
+    N = 5             # 三角関数の級数の個数
 
-    t = np.linspace(0, 2*np.pi, K)
-    f_x = data[:, 0]
-    f_y = data[:, 1]
-    g_x = get_reg_func(t, f_x, N)
-    g_y = get_reg_func(t, f_y, N)
+    t_s = np.linspace(0, 2*np.pi, K)
+    x_s = data[:, 0]
+    y_s = data[:, 1]
 
-    plt.scatter(f_x, t, c='r') ###
+    g_x = get_reg_func(t_s, x_s, N)
+    g_y = get_reg_func(t_s, y_s, N)
     t = np.linspace(0, 2*np.pi, 10000)
-    plt.plot(g_x(t), t, c='b') ###
-    plt.show() ###
+    x = g_x(t)
+    y = g_y(t)
 
-    plot_animation(t, g_x(t), g_y(t), f_x, f_y)
+    plot_animation(t, x, y, t_s, x_s, y_s)
     plt.show()
