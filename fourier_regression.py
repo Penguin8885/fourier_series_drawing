@@ -61,7 +61,7 @@ def plot_animation(t, x, y, t_s, x_s, y_s):
     ax4 = plt.subplot(2, 2, 4) # x-tグラフ(縦向き)
 
     ims = []
-    for i in range(0, len(t)+int(len(t)/10), int(len(t)/10)):
+    for i in range(0, len(t)+int(len(t)/100), int(len(t)/100)):
         print(i)
         ax1.scatter(t_s, y_s, c='r')
         ax2.scatter(x_s, y_s, c='r')
@@ -71,13 +71,13 @@ def plot_animation(t, x, y, t_s, x_s, y_s):
         im4 = ax4.plot(x[:i], t[:i], c='b')[0]
         ims.append([im1, im2, im4])
 
-    ani = animation.ArtistAnimation(fig, ims, interval=1000)
-    # ani.save('anim.mp4')
+    ani = animation.ArtistAnimation(fig, ims, interval=100, repeat_delay=1000)
+    ani.save('animation.mp4')
 
 if __name__ == '__main__':
     data = np.loadtxt("path1.csv", delimiter=",")
     # data = np.loadtxt("path2.csv", delimiter=",")
-    data = np.r_[data, data[0,:].reshape(1,-1)]
+    data = np.r_[data, data[0,:].reshape(1,-1)] # 始点を終点として追加
     K = data.shape[0] # サンプリング数
     N = 5             # 三角関数の級数の個数
 
