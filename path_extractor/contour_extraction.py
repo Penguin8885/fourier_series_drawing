@@ -68,6 +68,6 @@ if __name__ == '__main__':
         for x, y in points:
             bounded = cv2.drawMarker(img_cp, (x, y), (0, 0, 255), markerSize=3)
 
-        # 画像保存
+        # 保存
         cv2.imwrite('bounded%d.jpg' % i, bounded)
-
+        np.savetxt('extracted_path%d.csv' % i, points, delimiter=',')
