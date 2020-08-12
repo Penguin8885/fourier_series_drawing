@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>JavaScript CanvasClicker Sample Page</title>
+
+        <!-- javascript main -->
+        <script type="text/javascript" src="js/main.js"></script>
+    </head>
+
+    <!-- bodyを表示完了後にonLoadに登録された関数が実行される -->
+    <body onLoad="main();">
+        <canvas id="canvas1" width="500" height="500" style="border:solid 1px #000"></canvas>
+        <br />
+        <input type="button" value="display" onclick="display();"/>
+        <div id="output1"></div>
+    </body>
+</html>
