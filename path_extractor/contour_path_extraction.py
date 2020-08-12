@@ -70,4 +70,5 @@ if __name__ == '__main__':
 
         # 保存
         cv2.imwrite('bounded%d.jpg' % i, bounded)
-        np.savetxt('extracted_path%d.csv' % i, points, delimiter=',')
+        points = [(x, y*(-1) + (height - 1)) for x, y in points]
+        np.savetxt('extracted_path%d.csv' % i, points, delimiter=',', fmt='%d')
