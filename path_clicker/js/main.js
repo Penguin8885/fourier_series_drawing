@@ -37,7 +37,7 @@ function main(){
                 context.stroke();
             })(x, y);
 
-            p = [x, y*(-1) + canvas.height]
+            p = [x, y*(-1) + (canvas.height - 1)]
             points.push(p);
             console.log(p);
         },
