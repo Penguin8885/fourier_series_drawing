@@ -28,7 +28,7 @@ if __name__ == '__main__':
     img_bgr = cv2.rectangle(
                 img_bgr,                # 書き込む画像（上書き）
                 (0, 0),                 # 端点1
-                (height-1, width-1),    # 端点2
+                (width-1, height-1),    # 端点2
                 (255, 255, 255),        # 色
                 3                       # 太さ
             )
