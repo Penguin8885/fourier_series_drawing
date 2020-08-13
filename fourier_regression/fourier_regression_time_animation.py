@@ -17,7 +17,7 @@ def plot_animation(data_list, frame_num=100, save=False):
     ax4 = plt.subplot(2, 2, 4) # x-tグラフ(縦向き)
 
     # 各フレームごとに描画
-    color_list = ['k', 'r', 'g', 'b', 'y']
+    cmap = plt.get_cmap("tab10")    # 10色のカラーマップを取得
     ims = []
     for frame_n in range(frame_num):
         print('frame', frame_n)
@@ -28,9 +28,9 @@ def plot_animation(data_list, frame_num=100, save=False):
             ax1.scatter(t_s, y_s, c='gray', s=1)
             # ax2.scatter(x_s, y_s, c='gray', s=1)
             ax4.scatter(x_s, t_s, c='gray', s=1)
-            im1 = ax1.plot(t[:i], y[:i], c=color_list[k])[0]
-            im2 = ax2.plot(x[:i], y[:i], c=color_list[k])[0]
-            im4 = ax4.plot(x[:i], t[:i], c=color_list[k])[0]
+            im1 = ax1.plot(t[:i], y[:i], c=cmap(k%10))[0]
+            im2 = ax2.plot(x[:i], y[:i], c=cmap(k%10))[0]
+            im4 = ax4.plot(x[:i], t[:i], c=cmap(k%10))[0]
             im_list += (im1, im2, im4)  # リストの結合
         ims.append(im_list)             # フレーム追加
 
@@ -56,4 +56,4 @@ if __name__ == '__main__':
 
     # プロット
     # plot_animation(data_list, frame_num=10)
-    plot_animation(data_list, frame_num=100, save=True)
+    plot_animation(data_list, frame_num=20, save=True)
