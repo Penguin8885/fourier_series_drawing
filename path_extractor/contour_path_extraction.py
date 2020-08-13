@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
         # 面積が画像全体に対して十分小さい or 面積が画像全体と同等なものは無視
         area = cv2.contourArea(contours[i])
-        if area <= width*height*0.01 or area >= width*height*0.99:
+        if area <= width*height*0.0001 or area >= width*height*0.99:
             continue
 
         # 輪郭描画
