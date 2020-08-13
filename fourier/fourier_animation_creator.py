@@ -1,27 +1,55 @@
-"""
-liner regression by approximate fourier series
-
-sample of f                : f(t_1), ..., f(t_N)
-approximate fourier series : g(t) = Σ_{m=0}^M (a_m sin(mx) + b_m cos(mx))
-loss function              : Σ_{n=1}^N (f(t_n) - g(t_n))^2 = || bm{f} - Aw ||_2^2
-
-    [cos(0t_1), sin(t_1), cos(t_1), sin(2t_1), cos(2t_1), ..., sin(Mt_1), cos(Mt_1)]
-A = [cos(0t_2), sin(t_2), cos(t_2), sin(2t_2), cos(2t_2), ..., sin(Mt_2), cos(Mt_2)]
-    [ ...     ,                                                         , ...      ]
-    [cos(0t_N), sin(t_N), cos(t_N), sin(2t_N), cos(2t_N), ..., sin(Mt_N), cos(Mt_N)]
-
-w = [b_0, a_1, b_1, a_2, b_2, ..., a_M, b_M]
-"""
-
 import numpy as np
 from numpy import linalg as la
-np.set_printoptions(precision=3)
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
+def load_points(filename):
+    # データの読み込み
+    data = np.loadtxt(filename, delimiter=",")
+    data = np.r_[data, data[0,:].reshape(1,-1)] # 始点を終点として追加（周期関数化）
+    N = data.shape[0]                           # サンプリング数
+
+    # 各サンプル点の読み込み
+    t_s = np.linspace(0, 2*np.pi, N)
+    x_s = data[:, 0]
+    y_s = data[:, 1]
+
+    return t_s, x_s, y_s
+
+def get_2D_regression_curve(t_s, x_s, y_s, M):
+    """
+    Mは有限フーリエ級数の三角関数の個数
+    """
+
+    # 回帰関数の作成
+    g_x = get_reg_func(t_s, x_s, M)
+    g_y = get_reg_func(t_s, y_s, M)
+
+    # 回帰曲線の作成
+    t = np.linspace(0, 2*np.pi, 10000)
+    x = g_x(t)
+    y = g_y(t)
+
+    return t, x, y
+
 def get_reg_func(t_s, f_s, M):
+    """
+    liner regression by finite fourier series (FFS)
+
+    sample of f           : f(t_1), ..., f(t_N)
+    finite fourier series : g(t) = Σ_{m=0}^M (a_m cos(mt) + b_m sin(mt))
+
+    loss function         : Σ_{n=1}^N (f(t_n) - g(t_n))^2 = || bm{f} - Aw ||_2^2
+        [cos(0t_1), cos(t_1), sin(t_1), cos(2t_1), sin(2t_1), ..., cos(Mt_1), sin(Mt_1)]
+    A = [cos(0t_2), cos(t_2), sin(t_2), cos(2t_2), sin(2t_2), ..., cos(Mt_2), sin(Mt_2)]
+        [ ...     ,                                                ...      ,          ]
+        [cos(0t_N), cos(t_N), sin(t_N), cos(2t_N), sin(2t_N), ..., cos(Mt_N), sin(Mt_N)]
+
+    w = [a_0, a_1, b_1, a_2, b_2, ..., a_M, b_M]
+    """
+
     # サンプル点の数の取得
     N = len(f_s)
 
@@ -29,8 +57,8 @@ def get_reg_func(t_s, f_s, M):
     A = np.empty((N,2*M+1), float)
     A[:, 0] = np.cos(0*t_s)
     for m in range(1, M+1):
-        A[:, 2*m-1] = np.sin(m*t_s)
-        A[:, 2*m]   = np.cos(m*t_s)
+        A[:, 2*m-1] = np.cos(m*t_s)
+        A[:, 2*m]   = np.sin(m*t_s)
 
     # 回帰係数wの計算
     f_s = f_s.reshape(-1, 1)    # 列ベクトル化
@@ -43,7 +71,7 @@ def get_reg_func(t_s, f_s, M):
         # 回帰関数の計算
         func = w[0]*np.cos(0*t)
         for m in range(1, M+1):
-            func += w[2*m-1]*np.sin(m*t) + w[2*m]*np.cos(m*t)
+            func += w[2*m-1]*np.cos(m*t) + w[2*m]*np.sin(m*t)
         return func
 
     # 係数をセットした回帰関数を作成
@@ -74,23 +102,12 @@ def plot_animation(t, x, y, t_s, x_s, y_s, frame_num=100):
     ani = animation.ArtistAnimation(fig, ims, interval=int(10000/frame_num))
     ani.save('animation.mp4')
 
+
 if __name__ == '__main__':
-    # data = np.loadtxt("sample_path1.csv", delimiter=",")
-    # data = np.loadtxt("sample_path2.csv", delimiter=",")
-    data = np.loadtxt("extracted_path3.csv", delimiter=",")
-    data = np.r_[data, data[0,:].reshape(1,-1)] # 始点を終点として追加
-    N = data.shape[0] # サンプリング数
-    M = 100             # 三角関数の級数の個数
+    t_s, x_s, y_s = load_points('extracted_path3.csv')
+    t, x, y = get_2D_regression_curve(t_s, x_s, y_s, M=100)
 
-    t_s = np.linspace(0, 2*np.pi, N)
-    x_s = data[:, 0]
-    y_s = data[:, 1]
 
-    g_x = get_reg_func(t_s, x_s, M)
-    g_y = get_reg_func(t_s, y_s, M)
-    t = np.linspace(0, 2*np.pi, 10000)
-    x = g_x(t)
-    y = g_y(t)
-
+    # プロット
     plot_animation(t, x, y, t_s, x_s, y_s, frame_num=30)
     plt.show()
