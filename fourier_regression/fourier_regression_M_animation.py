@@ -15,13 +15,15 @@ def plot_animation(data_list, save=False):
     plt.subplots_adjust(left=0.07, right=0.99, bottom=0.05, top=0.98)
 
     # 各フレームごとに描画
+    cmap = plt.get_cmap("tab10")        # 10色のカラーマップを取得
     ims = []
     for i, line_list in enumerate(data_list):
         print('frame', i)
 
         im_list = []
-        for t, x, y in line_list:
-            im = plt.plot(x, y, c='b')[0]
+        for k, line in enumerate(line_list):
+            t, x, y = line
+            im = plt.plot(x, y, c=cmap(k%10))[0]
             im_list.append(im)          # リストの結合
         ims.append(im_list)             # フレーム追加
 
