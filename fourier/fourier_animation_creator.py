@@ -1,6 +1,8 @@
+import sys, os
+import re
+
 import numpy as np
 from numpy import linalg as la
-
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -78,7 +80,7 @@ def get_reg_func(t_s, f_s, M):
     g = lambda t: calc_reg_func(t, w)
     return g
 
-def plot_animation(t, x, y, t_s, x_s, y_s, frame_num=100):
+def plot_animation(data_list, frame_num=100, save=False):
     fig = plt.figure()
     plt.rcParams['xtick.direction'] = 'in'
     plt.rcParams['ytick.direction'] = 'in'
@@ -88,26 +90,39 @@ def plot_animation(t, x, y, t_s, x_s, y_s, frame_num=100):
     ax2 = plt.subplot(2, 2, 2) # y-xグラフ
     ax4 = plt.subplot(2, 2, 4) # x-tグラフ(縦向き)
 
+    color_list = ['k', 'r', 'g', 'b', 'y']
     ims = []
-    for i in range(0, len(t)+int(len(t)/frame_num), int(len(t)/frame_num)):
-        print(i)
-        ax1.scatter(t_s, y_s, c='r')
-        ax2.scatter(x_s, y_s, c='r')
-        ax4.scatter(x_s, t_s, c='r')
-        im1 = ax1.plot(t[:i], y[:i], c='b')[0]
-        im2 = ax2.plot(x[:i], y[:i], c='b')[0]
-        im4 = ax4.plot(x[:i], t[:i], c='b')[0]
-        ims.append([im1, im2, im4])
+    for frame_n in range(frame_num):
+        print('frame', frame_n)
+        im_list = []
+        for k, datum in enumerate(data_list):
+            t_s, x_s, y_s, t, x, y = datum
+            i = int(len(t) / (frame_num-1) * frame_n)
+            ax1.scatter(t_s, y_s, c='gray', s=1)
+            # ax2.scatter(x_s, y_s, c='gray', s=1)
+            ax4.scatter(x_s, t_s, c='gray', s=1)
+            im1 = ax1.plot(t[:i], y[:i], c=color_list[k])[0]
+            im2 = ax2.plot(x[:i], y[:i], c=color_list[k])[0]
+            im4 = ax4.plot(x[:i], t[:i], c=color_list[k])[0]
+            im_list += (im1, im2, im4)  # リストの結合
+        ims.append(im_list)             # フレーム追加
 
     ani = animation.ArtistAnimation(fig, ims, interval=int(10000/frame_num))
-    ani.save('animation.mp4')
+    if save:
+        ani.save('animation.mp4')
+    plt.show()
 
 
 if __name__ == '__main__':
-    t_s, x_s, y_s = load_points('extracted_path3.csv')
-    t, x, y = get_2D_regression_curve(t_s, x_s, y_s, M=100)
-
+    # 各ファイルからデータ読み込み, 回帰曲線の生成
+    data_list = []
+    for filename in os.listdir('./'):
+        if re.match(r'extracted_path(\d+).csv', filename):
+            print('file', filename)
+            t_s, x_s, y_s = load_points(filename)
+            t, x, y = get_2D_regression_curve(t_s, x_s, y_s, M=int(len(t_s)/2))
+            data_list.append((t_s, x_s, y_s, t, x, y))
 
     # プロット
-    plot_animation(t, x, y, t_s, x_s, y_s, frame_num=30)
-    plt.show()
+    plot_animation(data_list, frame_num=10)
+    # plot_animation(data_list, frame_num=100, save=True)
