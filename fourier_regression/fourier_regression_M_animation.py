@@ -39,13 +39,13 @@ def plot_animation(data_list, save=False):
 if __name__ == '__main__':
     # 各ファイルからデータ読み込み, 回帰曲線の生成
     data_list = []
-    for i, ratio in enumerate([0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.08, 0.2, 0.5, 1]):
+    for i, M in enumerate([1, 2, 3, 5, 10, 20, 30, 50, 100]):
         print('frame', i)
         line_list = []
         for filename in os.listdir('./'):
             if re.match(r'extracted_path(\d+).csv', filename):
                 t_s, x_s, y_s = freg.load_points(filename)
-                t, x, y = freg.get_2D_regression_curve(t_s, x_s, y_s, M=int(len(t_s)/2 * ratio)+1)
+                t, x, y = freg.get_2D_regression_curve(t_s, x_s, y_s, M=min(int(len(t_s)/2), M))
                 line_list.append((t, x, y))
         data_list.append(line_list)
 
